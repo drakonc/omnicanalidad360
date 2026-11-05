@@ -26,6 +26,8 @@ export interface EstadoConsola {
   enEstadoDesde: string | null;
   llamada: LlamadaEnConsola | null;
   llamadasEnCola: number;
+  atendidasHoy: number;
+  abandonadasHoy: number;
 }
 
 export interface DocumentoDePrueba {
@@ -57,3 +59,28 @@ export const ESTADO_LLAMADA = {
   finalizada: 'finalizada',
   abandonada: 'abandonada'
 } as const;
+
+export interface AgenteEnTablero {
+  idUsuario: string;
+  nombre: string;
+  estadoAgente: string;
+  enEstadoDesde: string | null;
+}
+
+/** Estado de la operacion del dia, para la vista de supervisor. */
+export interface Tablero {
+  agentes: AgenteEnTablero[];
+  llamadasEnCola: number;
+  llamadasEnCurso: number;
+  atendidasHoy: number;
+  abandonadasHoy: number;
+  esperaMasLargaSegundos: number;
+  tmoPromedioSegundos: number;
+}
+
+/** Una causal del catalogo de tipificacion. */
+export interface Causal {
+  nivel1: string;
+  nivel2: string | null;
+  exigeCita: boolean;
+}

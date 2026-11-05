@@ -1,0 +1,226 @@
+<app-franja estado="supervisor" etiquetaEstado="Supervisor">
+  <app-dato-franja rotulo="Línea" valor="NEPS Imagenología" />
+  <app-dato-franja rotulo="Agentes conectados" [valor]="reparto().total - reparto().desconectados + ' de ' + reparto().total" />
+
+  <div class="acciones-franja">
+    <app-indicador-conexion [conectado]="conectado()" [segundos]="segundosSinDato()" />
+  </div>
+</app-franja>
+
+<section class="pantalla">
+  <!-- Los cinco indicadores grandes del diseno -->
+  <div class="indicadores">
+    <article class="panel indicador">
+      <div class="cabeza"><span class="rotulo">En espera</span><span class="icono">call</span></div>
+      <strong class="tabular">{{ tablero()?.llamadasEnCola ?? 0 }}</strong>
+      <small>llamadas en cola</small>
+    </article>
+
+    <article class="panel indicador" [class.critico]="(tablero()?.esperaMasLargaSegundos ?? 0) > 60">
+      <div class="cabeza"><span class="rotulo">Espera más larga</span><span class="icono">hourglass_top</span></div>
+      <strong class="tabular">{{ comoReloj(tablero()?.esperaMasLargaSegundos ?? 0) }}</strong>
+      <small>de las llamadas que esperan ahora</small>
+    </article>
+
+    <article class="panel indicador">
+      <div class="cabeza"><span class="rotulo">Atendidas hoy</span><span class="icono">call_received</span></div>
+      <strong class="tabular">{{ tablero()?.atendidasHoy ?? 0 }}</strong>
+      <small>llamadas finalizadas</small>
+    </article>
+
+    <article class="panel indicador" [class.alerta]="(tablero()?.abandonadasHoy ?? 0) > 0">
+      <div class="cabeza"><span class="rotulo">Abandonadas hoy</span><span class="icono">call_missed</span></div>
+      <strong class="tabular">{{ tablero()?.abandonadasHoy ?? 0 }}</strong>
+      <small>colgaron antes de que contestaran</small>
+    </article>
+
+    <article class="panel indicador">
+      <div class="cabeza"><span class="rotulo">TMO promedio</span><span class="icono">timer</span></div>
+      <strong class="tabular">{{ comoReloj(tablero()?.tmoPromedioSegundos ?? 0) }}</strong>
+      <small>conversación, mm:ss</small>
+    </article>
+  </div>
+
+  <p class="aviso pendiente">
+    <span class="icono pequeno">info</span>
+    <span>
+      El <strong>nivel de servicio</strong> no se muestra todavía: su umbral en
+      segundos está por validar con gerencia y el PRD no lo deja fijado.
+    </span>
+  </p>
+
+  <!-- Barra apilada de agentes -->
+  <article class="panel">
+    <div class="panel-cabecera">
+      <h2>Distribución de agentes</h2>
+      <span class="ocupacion">Ocupación actual: <strong>{{ ocupacion() }}%</strong></span>
+    </div>
+
+    <div class="panel-cuerpo">
+      @if (reparto().total > 0) {
+        <div class="barra-apilada">
+          @if (reparto().enLlamada > 0) {
+            <span class="tramo en-llamada" [style.width.%]="reparto().porcentajes.enLlamada">
+              {{ reparto().enLlamada }} en llamada
+            </span>
+          }
+          @if (reparto().disponibles > 0) {
+            <span class="tramo disponible" [style.width.%]="reparto().porcentajes.disponibles">
+              {{ reparto().disponibles }} disponibles
+            </span>
+          }
+          @if (reparto().enPausa > 0) {
+            <span class="tramo pausa" [style.width.%]="reparto().porcentajes.enPausa">
+              {{ reparto().enPausa }} en pausa
+            </span>
+          }
+          @if (reparto().desconectados > 0) {
+            <span class="tramo desconectado" [style.width.%]="reparto().porcentajes.desconectados">
+              {{ reparto().desconectados }} desconectados
+            </span>
+          }
+        </div>
+
+        <div class="leyenda">
+          <span><i class="punto en-llamada"></i> En llamada: <strong>{{ reparto().enLlamada }}</strong></span>
+          <span><i class="punto disponible"></i> Disponibles: <strong>{{ reparto().disponibles }}</strong></span>
+          <span><i class="punto pausa"></i> En pausa: <strong>{{ reparto().enPausa }}</strong></span>
+          <span><i class="punto desconectado"></i> Desconectados: <strong>{{ reparto().desconectados }}</strong></span>
+        </div>
+      } @else {
+        <p class="sin-dato">Sin agentes cargados.</p>
+      }
+    </div>
+  </article>
+
+  <div class="columnas">
+    <!-- Colas -->
+    <article class="panel">
+      <div class="panel-cabecera">
+        <h2>Colas de atención</h2>
+        <span class="pildora" data-estado="pausa">1 real · 2 de prueba</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Cola</th>
+            <th>Agentes</th>
+            <th>En espera</th>
+            <th>Origen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="fila-real">
+            <td><strong>NEPS Imagenología</strong></td>
+            <td class="tabular">{{ reparto().total }}</td>
+            <td class="tabular">{{ tablero()?.llamadasEnCola ?? 0 }}</td>
+            <td><span class="pildora" data-estado="disponible">REAL</span></td>
+          </tr>
+          @for (cola of colasDemostracion.slice(1); track cola.nombre) {
+            <tr class="fila-demo">
+              <td>{{ cola.nombre }}</td>
+              <td class="tabular">{{ cola.agentes }}</td>
+              <td class="tabular">{{ cola.enEspera }}</td>
+              <td><span class="pildora">PRUEBA</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <p class="pie-tabla">
+        El piloto tiene una sola línea. Las otras colas son datos de prueba
+        para mostrar cómo se vería la pantalla con varias.
+      </p>
+    </article>
+
+    <!-- Monitoreo de agentes -->
+    <article class="panel">
+      <div class="panel-cabecera">
+        <h2>Monitoreo de agentes en tiempo real</h2>
+        <span class="pildora" data-estado="disponible"><span class="punto"></span>DATOS REALES</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Agente</th>
+            <th>Estado</th>
+            <th>Tiempo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (agente of agentes(); track agente.idUsuario) {
+            <tr>
+              <td>
+                <strong>{{ agente.nombre }}</strong>
+                <small class="codigo-agente">{{ agente.idUsuario }}</small>
+              </td>
+              <td>
+                <span class="pildora" [attr.data-estado]="agente.estadoAgente">
+                  <span class="punto"></span>{{ textoEstadoAgente(agente.estadoAgente) }}
+                </span>
+              </td>
+              <td class="tabular">{{ comoReloj(segundosEnEstado(agente.enEstadoDesde)) }}</td>
+              <td>
+                <button type="button" disabled title="Llega con la grabación, en el hito 3">
+                  <span class="icono pequeno">headset_mic</span> Escuchar
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="sin-dato">Sin agentes cargados.</td></tr>
+          }
+        </tbody>
+      </table>
+    </article>
+  </div>
+
+  <!-- Gestiones -->
+  <article class="panel">
+    <div class="panel-cabecera">
+      <h2>Gestiones registradas</h2>
+      <span class="pildora" data-estado="pausa">HITO 4 · DATOS DE PRUEBA</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Agente</th>
+          <th>Documento</th>
+          <th>Paciente</th>
+          <th>Tipificación</th>
+          <th>Cita</th>
+          <th>TMO</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (gestion of gestionesDemostracion; track gestion.fecha) {
+          <tr>
+            <td class="tabular">{{ gestion.fecha }}</td>
+            <td class="tabular">{{ gestion.agente }}</td>
+            <td class="tabular">{{ gestion.documento }}</td>
+            <td>{{ gestion.nombre }}</td>
+            <td>
+              <strong>{{ gestion.nivel1 }}</strong>
+              <small class="nivel-dos">{{ gestion.nivel2 }}</small>
+            </td>
+            <td class="tabular">{{ gestion.idCita ?? '—' }}</td>
+            <td class="tabular">{{ gestion.tmo }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <div class="pie-panel">
+      <p class="pie-tabla">
+        Son gestiones inventadas. La exportación a CSV y la corrección de
+        tipificaciones llegan con el hito 4.
+      </p>
+      <button type="button" disabled>
+        <span class="icono pequeno">download</span> Exportar CSV
+      </button>
+    </div>
+  </article>
+</section>

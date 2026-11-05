@@ -52,5 +52,6 @@ app.MapGet("/", () => Results.Ok(new
 }));
 
 app.MapearEndpointsConsola();
+app.MapearEndpointsSupervision();
 
 app.Run();

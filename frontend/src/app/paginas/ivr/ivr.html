@@ -1,0 +1,121 @@
+<app-franja estado="supervisor" etiquetaEstado="Administración">
+  <app-dato-franja rotulo="Flujo" valor="NEPS Imagenología" />
+  <app-dato-franja rotulo="Pasos activos" [valor]="pasosActivos + ' de ' + flujo.length" />
+</app-franja>
+
+<section class="pantalla">
+  <p class="aviso pendiente banda-aviso">
+    <span class="icono pequeno">construction</span>
+    <span>
+      <strong>Maqueta de la pantalla de administración.</strong>
+      Los pasos en color <strong>sí</strong> describen lo que hace hoy la llamada
+      simulada. Los pasos en gris vienen del diseño y no existen en el piloto.
+      Editar aquí no cambia el flujo: eso llega cuando se construya el IVR real.
+    </span>
+  </p>
+
+  <div class="columnas">
+    <!-- Arbol del flujo -->
+    <article class="panel">
+      <div class="panel-cabecera">
+        <h2><span class="icono pequeno">account_tree</span> Flujo de la llamada</h2>
+      </div>
+
+      <div class="panel-cuerpo arbol">
+        @for (nodo of flujo; track nodo.id; let ultimo = $last) {
+          <button
+            type="button"
+            class="nodo"
+            [class.inactivo]="!nodo.activo"
+            [class.elegido]="seleccionado().id === nodo.id"
+            (click)="seleccionar(nodo)">
+            <span class="icono-nodo"><span class="icono">{{ iconoDe(nodo.tipo) }}</span></span>
+            <span class="texto-nodo">
+              <strong>{{ nodo.titulo }}</strong>
+              <small>{{ nombreTipo(nodo.tipo) }}</small>
+            </span>
+            @if (nodo.activo) {
+              <span class="pildora" data-estado="disponible">ACTIVO</span>
+            } @else {
+              <span class="pildora">NO EXISTE</span>
+            }
+          </button>
+
+          @if (!ultimo) {
+            <span class="union" [class.inactiva]="!nodo.activo"></span>
+          }
+        }
+      </div>
+    </article>
+
+    <!-- Detalle del paso elegido -->
+    <article class="panel">
+      <div class="panel-cabecera">
+        <h2>Detalle del paso</h2>
+        @if (seleccionado().activo) {
+          <span class="pildora" data-estado="disponible"><span class="punto"></span>EN USO</span>
+        } @else {
+          <span class="pildora">FUERA DEL PILOTO</span>
+        }
+      </div>
+
+      <div class="panel-cuerpo">
+        <span class="rotulo">Nombre del paso</span>
+        <p class="dato destacado">{{ seleccionado().titulo }}</p>
+
+        <span class="rotulo separado">Tipo</span>
+        <p class="dato">{{ nombreTipo(seleccionado().tipo) }}</p>
+
+        <span class="rotulo separado">Qué hace</span>
+        <p class="detalle">{{ seleccionado().detalle }}</p>
+
+        @if (seleccionado().tipo === 'mensaje') {
+          <label class="campo separado">
+            Texto que se reproduce
+            <textarea [value]="seleccionado().detalle" readonly></textarea>
+          </label>
+        }
+
+        @if (seleccionado().tipo === 'captura') {
+          <div class="rejilla-parametros">
+            <div>
+              <span class="rotulo">Intentos</span>
+              <p class="dato tabular">2</p>
+            </div>
+            <div>
+              <span class="rotulo">Espera por intento</span>
+              <p class="dato tabular">10 s</p>
+            </div>
+            <div>
+              <span class="rotulo">Longitud válida</span>
+              <p class="dato tabular">5 a 12 dígitos</p>
+            </div>
+            <div>
+              <span class="rotulo">Si no marca</span>
+              <p class="dato">Pasa igual a la cola, sin documento</p>
+            </div>
+          </div>
+        }
+
+        @if (seleccionado().tipo === 'cola') {
+          <div class="rejilla-parametros">
+            <div>
+              <span class="rotulo">Estrategia</span>
+              <p class="dato">El que lleva más tiempo libre</p>
+            </div>
+            <div>
+              <span class="rotulo">Agentes</span>
+              <p class="dato tabular">5</p>
+            </div>
+          </div>
+        }
+
+        <div class="acciones">
+          <button type="button" disabled title="Llega con el IVR real">
+            <span class="icono pequeno">edit</span> Editar paso
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

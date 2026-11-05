@@ -1,119 +1,229 @@
-<section class="consola">
-  <header>
-    <div>
-      <h1>Consola del agente</h1>
-      <p class="aclaracion">NEPS Imagenología · línea de prueba</p>
-    </div>
-
-    <div class="cabecera-derecha">
-      <app-indicador-conexion
-        [conectado]="conectado()"
-        [segundos]="segundosSinDato()" />
-
-      <label class="selector">
-        Agente
-        <select [ngModel]="idAgente()" (ngModelChange)="cambiarAgente($event)" name="agente">
-          @for (agente of agentes(); track agente.idUsuario) {
-            <option [value]="agente.idUsuario">
-              {{ agente.idUsuario }} · {{ agente.nombre }}
-            </option>
-          }
-        </select>
-      </label>
-    </div>
-  </header>
-
-  @if (error(); as texto) {
-    <p class="franja-error">{{ texto }}</p>
+<app-franja [estado]="estadoFranja()" [etiquetaEstado]="textoEstadoAgente(estado()?.estadoAgente)">
+  @if (llamadaEnCurso()) {
+    <app-dato-franja rotulo="Duración" [valor]="comoReloj(segundosEnLlamada())" [grande]="true" />
+  } @else if (llamadaSonando()) {
+    <app-dato-franja rotulo="Timbrando" [valor]="comoReloj(segundosEnEspera())" [grande]="true" />
+  } @else {
+    <app-dato-franja rotulo="En estado" [valor]="comoReloj(segundosEnEstado())" [grande]="true" />
   }
 
-  <div class="barra-estado">
-    <span class="etiqueta" [attr.data-estado]="estado()?.estadoAgente">
-      {{ textoEstadoAgente(estado()?.estadoAgente) }}
-    </span>
+  <app-dato-franja rotulo="Cola activa" valor="NEPS Imagenología" />
+  <app-dato-franja rotulo="En espera" [valor]="textoEnCola()" />
 
-    <div class="acciones">
-      <button
-        type="button"
-        [disabled]="estaDisponible() || llamadaEnCurso()"
-        (click)="ponerse('disponible')">
-        Ponerme disponible
-      </button>
-      <button
-        type="button"
-        [disabled]="estaEnPausa() || llamadaEnCurso()"
-        (click)="ponerse('pausa')">
-        Ponerme en pausa
-      </button>
-    </div>
+  <div class="acciones-franja">
+    <app-indicador-conexion [conectado]="conectado()" [segundos]="segundosSinDato()" />
 
-    <span class="cola">
-      Esperando en cola: <strong>{{ estado()?.llamadasEnCola ?? 0 }}</strong>
-    </span>
+    <select
+      class="selector-agente"
+      [ngModel]="idAgente()"
+      (ngModelChange)="cambiarAgente($event)"
+      name="agente">
+      @for (agente of agentes(); track agente.idUsuario) {
+        <option [value]="agente.idUsuario">{{ agente.idUsuario }} · {{ agente.nombre }}</option>
+      }
+    </select>
+
+    @if (estaDisponible()) {
+      <button type="button" class="boton-franja" [disabled]="llamadaEnCurso()" (click)="ponerse('pausa')">
+        <span class="icono pequeno">pause_circle</span> Ir a pausa
+      </button>
+    } @else {
+      <button type="button" class="boton-franja" [disabled]="llamadaEnCurso()" (click)="ponerse('disponible')">
+        <span class="icono pequeno">play_circle</span> Ponerme disponible
+      </button>
+    }
+  </div>
+</app-franja>
+
+<section class="escritorio">
+  @if (error(); as texto) {
+    <p class="aviso error"><span class="icono pequeno">error</span> {{ texto }}</p>
+  }
+
+  <div class="indicadores">
+    <article class="panel indicador">
+      <span class="rotulo">Llamadas atendidas hoy</span>
+      <strong class="tabular">{{ estado()?.atendidasHoy ?? 0 }}</strong>
+    </article>
+    <article class="panel indicador">
+      <span class="rotulo">En cola (general)</span>
+      <strong class="tabular">{{ estado()?.llamadasEnCola ?? 0 }}</strong>
+    </article>
+    <article class="panel indicador">
+      <span class="rotulo">Abandonadas hoy</span>
+      <strong class="tabular">{{ estado()?.abandonadasHoy ?? 0 }}</strong>
+    </article>
+    <article class="panel indicador">
+      <span class="rotulo">Mi estado</span>
+      <strong class="estado-texto">{{ textoEstadoAgente(estado()?.estadoAgente) }}</strong>
+    </article>
   </div>
 
-  @if (llamadaSonando()) {
-    <div class="tarjeta sonando">
-      <h2>Llamada entrante</h2>
-      <dl>
-        <dt>Número de origen</dt>
-        <dd>{{ estado()?.llamada?.telefonoOrigen }}</dd>
-        <dt>Documento capturado por el IVR</dt>
-        <dd>
-          @if (estado()?.llamada?.documentoIvr; as documento) {
-            <strong>{{ documento }}</strong>
+  <div class="columnas">
+    <div class="columna">
+      <article class="panel">
+        <div class="panel-cabecera">
+          <h2>Llamada</h2>
+          @if (llamadaEnCurso()) {
+            <span class="pildora" data-estado="en_llamada"><span class="punto"></span>LLAMADA ACTIVA</span>
+          } @else if (llamadaSonando()) {
+            <span class="pildora" data-estado="en_cola"><span class="punto"></span>TIMBRANDO</span>
           } @else {
-            <span class="sin-dato">El paciente no marcó documento</span>
+            <span class="pildora"><span class="punto"></span>SIN LLAMADA</span>
           }
-        </dd>
-        <dt>Esperando hace</dt>
-        <dd>{{ comoReloj(segundosEnEspera()) }}</dd>
-      </dl>
-      <button type="button" class="principal" (click)="contestar()">Contestar</button>
-    </div>
-  } @else if (llamadaEnCurso()) {
-    <div class="tarjeta en-curso">
-      <h2>En llamada</h2>
-      <p class="cronometro">{{ comoReloj(segundosEnLlamada()) }}</p>
-      <dl>
-        <dt>Número de origen</dt>
-        <dd>{{ estado()?.llamada?.telefonoOrigen }}</dd>
-        <dt>Documento capturado por el IVR</dt>
-        <dd>
-          @if (estado()?.llamada?.documentoIvr; as documento) {
-            <strong>{{ documento }}</strong>
+        </div>
+
+        <div class="panel-cuerpo">
+          @if (llamadaEnCurso() || llamadaSonando()) {
+            <p class="numero tabular">{{ estado()?.llamada?.telefonoOrigen }}</p>
+            <p class="linea-sip">Línea de prueba · Omnicanalidad 360</p>
+
+            <div class="acciones-llamada">
+              @if (llamadaSonando()) {
+                <button type="button" class="exito ancho" (click)="contestar()">
+                  <span class="icono">call</span> Contestar
+                </button>
+              } @else {
+                <button type="button" class="peligro ancho" (click)="colgar()">
+                  <span class="icono">call_end</span> Colgar llamada
+                </button>
+              }
+            </div>
+          } @else if (cargando()) {
+            <p class="vacio"><span class="icono grande">sync</span> Conectando con la plataforma…</p>
           } @else {
-            <span class="sin-dato">El paciente no marcó documento</span>
+            <p class="vacio">
+              <span class="icono grande">phone_in_talk</span>
+              @if (estaDisponible()) {
+                Esperando llamadas. La próxima que entre sonará aquí.
+              } @else {
+                Ponte disponible para recibir llamadas.
+              }
+            </p>
           }
-        </dd>
-        <dt>Aviso de grabación</dt>
-        <dd>
-          {{ estado()?.llamada?.avisoGrabacionReproducido ? 'Reproducido' : 'No reproducido' }}
-        </dd>
-      </dl>
+        </div>
+      </article>
 
-      <p class="pendiente">
-        Los datos del paciente, el agendamiento y la tipificación llegan en los
-        siguientes hitos.
-      </p>
+      <article class="panel">
+        <div class="panel-cabecera">
+          <h2><span class="icono pequeno">description</span> Guion sugerido</h2>
+        </div>
+        <div class="panel-cuerpo guion">
+          @for (paso of guion; track paso.titulo; let i = $index) {
+            <div class="paso">
+              <span class="numero-paso">{{ i + 1 }}</span>
+              <div>
+                <span class="rotulo">{{ paso.titulo }}</span>
+                <p>{{ paso.texto }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </article>
+    </div>
 
-      <button type="button" class="peligro" (click)="colgar()">Colgar</button>
+    <div class="columna">
+      <article class="panel">
+        <div class="panel-cabecera">
+          <h2>Ficha del paciente</h2>
+          <span class="pildora" data-estado="pausa">HITO 2</span>
+        </div>
+
+        <div class="panel-cuerpo">
+          <div class="campo-dato">
+            <span class="rotulo">Documento capturado por el IVR</span>
+            @if (estado()?.llamada?.documentoIvr; as documento) {
+              <p class="dato destacado tabular">{{ documento }}</p>
+              <p class="nota-dato">
+                <span class="icono pequeno">bolt</span>
+                Llegó solo desde la llamada. Nadie lo digitó.
+              </p>
+            } @else if (llamadaEnCurso() || llamadaSonando()) {
+              <p class="sin-dato">El paciente no marcó documento</p>
+            } @else {
+              <p class="sin-dato">Sin llamada en curso</p>
+            }
+          </div>
+
+          <hr class="separador" />
+
+          <div class="campo-dato">
+            <span class="rotulo">Aviso de grabación</span>
+            @if (estado()?.llamada?.avisoGrabacionReproducido) {
+              <p class="dato confirmado">
+                <span class="icono pequeno">verified</span> Reproducido antes de pedir el documento
+              </p>
+            } @else {
+              <p class="sin-dato">Sin llamada en curso</p>
+            }
+          </div>
+
+          <div class="pendiente-hito">
+            <span class="icono pequeno">schedule</span>
+            <div>
+              <strong>Nombre, EPS, sede y derechos llegan en el hito 2.</strong>
+              <p>Los consultará el Everest simulado con este mismo documento.</p>
+            </div>
+          </div>
+        </div>
+      </article>
     </div>
-  } @else if (cargando()) {
-    <div class="tarjeta vacio">
-      <h2>Conectando con la plataforma…</h2>
-      <p>Un momento.</p>
-    </div>
-  } @else {
-    <div class="tarjeta vacio">
-      <h2>Esperando llamadas</h2>
-      <p>
-        @if (estaDisponible()) {
-          Estás disponible. La próxima llamada que entre sonará aquí.
-        } @else {
-          Ponte disponible para recibir llamadas.
-        }
-      </p>
-    </div>
-  }
+  </div>
 </section>
+
+@if (llamadaSonando()) {
+  <div class="velo">
+    <div class="modal-llamada">
+      <header>
+        <div>
+          <span class="pildora-modal">TIMBRANDO</span>
+          <span class="linea-modal">Línea entrante 1</span>
+          <h2>Llamada entrante en espera de operador</h2>
+        </div>
+        <div class="tiempo-timbre">
+          <strong class="tabular">{{ comoReloj(segundosEnEspera()) }}</strong>
+          <span>TIEMPO EN TIMBRE</span>
+        </div>
+      </header>
+
+      <div class="cuerpo-modal">
+        <div class="bloque-origen">
+          <span class="rotulo">Número telefónico de origen</span>
+          <p class="numero tabular">{{ estado()?.llamada?.telefonoOrigen }}</p>
+        </div>
+
+        <div class="rejilla-modal">
+          <div class="caja">
+            <span class="rotulo">Identificado por documento (IVR)</span>
+            @if (estado()?.llamada?.documentoIvr; as documento) {
+              <p class="dato destacado tabular">{{ documento }}</p>
+            } @else {
+              <p class="sin-dato">El paciente no marcó documento</p>
+            }
+          </div>
+          <div class="caja">
+            <span class="rotulo">Cola y enrutamiento</span>
+            <p class="dato">NEPS Imagenología</p>
+            <p class="nota-dato"><span class="icono pequeno">dialpad</span> Documento marcado por teclado</p>
+          </div>
+        </div>
+
+        <div class="aviso informativo">
+          <span class="icono pequeno">campaign</span>
+          Se reprodujo el aviso de grabación antes de pedir el documento.
+        </div>
+
+        <div class="acciones-modal">
+          <button type="button" class="exito grande" (click)="contestar()">
+            <span class="icono">call</span> Contestar
+          </button>
+        </div>
+      </div>
+
+      <footer>
+        <span class="tabular">{{ estado()?.llamada?.idLlamada }}</span>
+        <span>Telefonía simulada · versión local</span>
+      </footer>
+    </div>
+  </div>
+}

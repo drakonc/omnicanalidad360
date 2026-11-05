@@ -1,0 +1,181 @@
+<app-franja estado="post_llamada" etiquetaEstado="Post-llamada">
+  <app-dato-franja rotulo="Tiempo en estado" [valor]="comoReloj(segundosTranscurridos())" [grande]="true" />
+  <app-dato-franja rotulo="Cola" valor="NEPS Imagenología" />
+
+  <div class="cuenta-regresiva">
+    <span class="rotulo-franja">Tiempo restante</span>
+    <strong class="tabular">{{ comoReloj(segundosRestantes()) }}</strong>
+    <div class="barra"><span [style.width.%]="porcentajeRestante()"></span></div>
+  </div>
+</app-franja>
+
+<section class="pantalla">
+  <p class="aviso pendiente banda-maqueta">
+    <span class="icono pequeno">construction</span>
+    <span>
+      <strong>Pantalla del hito 3, todavía no construida.</strong>
+      El resumen de la llamada son datos de prueba inventados. El catálogo de
+      causales sí es el real de la plataforma. Nada de lo que elijas aquí se guarda.
+    </span>
+  </p>
+
+  <div class="columnas">
+    <!-- Resumen de la llamada terminada -->
+    <article class="panel">
+      <div class="panel-cabecera">
+        <h2><span class="icono pequeno">contact_phone</span> Resumen de llamada terminada</h2>
+        <span class="pildora" data-estado="disponible"><span class="punto"></span>FINALIZADA</span>
+      </div>
+
+      <div class="panel-cuerpo">
+        <div class="bloque-paciente">
+          <div>
+            <span class="rotulo">Paciente</span>
+            <p class="dato destacado">{{ gestion.paciente }}</p>
+          </div>
+          <div class="derecha">
+            <span class="rotulo">Documento</span>
+            <p class="dato destacado tabular">{{ gestion.tipoDocumento }} {{ gestion.numeroDocumento }}</p>
+          </div>
+        </div>
+
+        <div class="rejilla-datos">
+          <div>
+            <span class="rotulo">Teléfono de contacto</span>
+            <p class="dato tabular">{{ gestion.telefono }}</p>
+          </div>
+          <div>
+            <span class="rotulo">EPS</span>
+            <p class="dato">{{ gestion.eps }}</p>
+          </div>
+          <div>
+            <span class="rotulo">Duración total</span>
+            <p class="dato tabular">{{ gestion.duracionLlamada }}</p>
+          </div>
+          <div>
+            <span class="rotulo">Horario de la sesión</span>
+            <p class="dato">{{ gestion.horarioSesion }}</p>
+          </div>
+        </div>
+
+        <div class="cita-agendada">
+          <span class="icono">event_available</span>
+          <div>
+            <span class="rotulo">Cita agendada en LUMIER</span>
+            <p class="dato destacado">{{ gestion.cita.examen }}</p>
+            <p class="detalle-cita">
+              {{ gestion.cita.fechaHora }} · {{ gestion.cita.sede }}
+              <span class="codigo tabular">{{ gestion.cita.idCita }}</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="grabacion">
+          <span class="icono pequeno">graphic_eq</span>
+          Grabación guardada
+          <span class="codigo tabular">{{ gestion.idGrabacion }}</span>
+        </div>
+
+        <hr class="separador" />
+
+        <span class="rotulo">Notas registradas en vivo</span>
+        <p class="notas">{{ gestion.notas }}</p>
+      </div>
+    </article>
+
+    <!-- Tipificacion -->
+    <article class="panel">
+      <div class="panel-cabecera">
+        <div>
+          <h2>Tipificación de la gestión</h2>
+          <p class="subtitulo">Elige la causal para cerrar la gestión y liberar la línea</p>
+        </div>
+        <span class="pildora" data-estado="alerta">OBLIGATORIO</span>
+      </div>
+
+      <div class="panel-cuerpo">
+        @if (intentoSinCausal()) {
+          <p class="aviso error">
+            <span class="icono pequeno">error</span>
+            No se puede cerrar la gestión sin una causal de Nivel 1.
+          </p>
+        }
+
+        <span class="rotulo">Nivel 1 · causal de la llamada</span>
+        <div class="rejilla-causales">
+          @for (nivel1 of nivelesUno(); track nivel1) {
+            <button
+              type="button"
+              class="causal"
+              [class.elegida]="nivel1Elegido() === nivel1"
+              (click)="elegirNivel1(nivel1)">
+              <span class="icono pequeno">{{ iconoDe(nivel1) }}</span>
+              {{ nivel1 }}
+              @if (nivel1Elegido() === nivel1) {
+                <span class="icono pequeno marca">check_circle</span>
+              }
+            </button>
+          } @empty {
+            <p class="sin-dato">No se pudo cargar el catálogo de tipificación.</p>
+          }
+        </div>
+
+        @if (nivelesDos().length > 0) {
+          <span class="rotulo separado">Nivel 2 · detalle</span>
+          <div class="rejilla-causales">
+            @for (causal of nivelesDos(); track causal.nivel2) {
+              <button
+                type="button"
+                class="causal"
+                [class.elegida]="nivel2Elegido() === causal.nivel2"
+                (click)="elegirNivel2(causal.nivel2!)">
+                {{ causal.nivel2 }}
+                @if (causal.exigeCita) {
+                  <span class="marca-cita">exige cita</span>
+                }
+              </button>
+            }
+          </div>
+          <p class="nota-provisional">
+            <span class="icono pequeno">info</span>
+            El Nivel 2 es provisional: está por validar con el supervisor de la línea.
+          </p>
+        }
+
+        @if (exigeCita()) {
+          <div class="aviso informativo">
+            <span class="icono pequeno">link</span>
+            Esta causal exige una cita. Se asocia la cita
+            <strong class="tabular">{{ gestion.cita.idCita }}</strong> de esta llamada.
+          </div>
+        }
+
+        <label class="campo separado">
+          Observaciones adicionales (opcional)
+          <textarea
+            [ngModel]="observaciones()"
+            (ngModelChange)="observaciones.set($event)"
+            name="observaciones"
+            placeholder="Detalles complementarios de la tipificación…"></textarea>
+        </label>
+
+        @if (guardada()) {
+          <p class="aviso informativo">
+            <span class="icono pequeno">check_circle</span>
+            Así se vería la gestión registrada. <strong>No se guardó nada</strong>:
+            esta pantalla es una maqueta del hito 3.
+          </p>
+        }
+
+        <div class="acciones-cierre">
+          <button type="button" (click)="guardar()">
+            <span class="icono pequeno">pause_circle</span> Guardar e ir a pausa
+          </button>
+          <button type="button" class="principal" [disabled]="!puedeGuardar()" (click)="guardar()">
+            <span class="icono pequeno">check</span> Guardar y quedar disponible
+          </button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

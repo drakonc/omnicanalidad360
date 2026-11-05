@@ -1,76 +1,117 @@
-<section class="simulador">
-  <header>
-    <h1>Teléfono del paciente</h1>
-    <p class="aclaracion">
-      Esto hace de llamada entrante mientras no está la telefonía real.
+<app-franja estado="disponible" etiquetaEstado="Teléfono de prueba">
+  <app-dato-franja rotulo="Línea" valor="NEPS Imagenología" />
+  <app-dato-franja rotulo="Telefonía" valor="Simulada" />
+</app-franja>
+
+<section class="pantalla">
+  <p class="aviso informativo banda-aviso">
+    <span class="icono pequeno">info</span>
+    <span>
+      <strong>Esto hace de llamada entrante mientras no está la telefonía real.</strong>
       Es lo primero que se reemplaza cuando llegue el número de prueba en Azure.
-    </p>
-  </header>
+      La consola del agente no se entera de la diferencia.
+    </span>
+  </p>
 
-  <div class="tarjeta">
-    <label>
-      Número desde el que llama
-      <input type="text" [(ngModel)]="telefono" name="telefono" />
-    </label>
+  <div class="columnas">
+    <article class="panel">
+      <div class="panel-cabecera">
+        <h2><span class="icono pequeno">dialpad</span> Marcar</h2>
+      </div>
 
-    <label class="casilla">
-      <input type="checkbox" [(ngModel)]="marcaDocumento" name="marcaDocumento" />
-      El paciente marca su documento en el teclado
-    </label>
+      <div class="panel-cuerpo">
+        <label class="campo">
+          Número desde el que llama
+          <input type="text" [(ngModel)]="telefono" name="telefono" />
+        </label>
 
-    @if (marcaDocumento()) {
-      <label>
-        Documento marcado
-        <input type="text" [(ngModel)]="documento" name="documento" />
-      </label>
-    } @else {
-      <p class="nota">
-        El paciente no marca nada. Tras 2 intentos de 10 segundos, la llamada
-        igual pasa a la cola, pero sin documento.
-      </p>
+        <label class="casilla">
+          <input type="checkbox" [(ngModel)]="marcaDocumento" name="marcaDocumento" />
+          El paciente marca su documento en el teclado
+        </label>
+
+        @if (marcaDocumento()) {
+          <label class="campo">
+            Documento marcado
+            <input type="text" class="tabular" [(ngModel)]="documento" name="documento" />
+          </label>
+        } @else {
+          <p class="nota">
+            El paciente no marca nada. Tras 2 intentos de 10 segundos, la llamada
+            igual pasa a la cola, pero sin documento.
+          </p>
+        }
+
+        <div class="acciones">
+          <button type="button" class="exito ancho" (click)="llamar()">
+            <span class="icono">call</span> Llamar
+          </button>
+          <button
+            type="button"
+            class="peligro"
+            [disabled]="!ultimaLlamada() || colgada()"
+            (click)="colgarPaciente()">
+            <span class="icono pequeno">call_end</span> Colgar antes de que contesten
+          </button>
+        </div>
+
+        @if (mensaje(); as texto) {
+          <p class="aviso informativo">
+            <span class="icono pequeno">check_circle</span> {{ texto }}
+          </p>
+        }
+      </div>
+    </article>
+
+    @if (ultimaLlamada(); as llamada) {
+      <article class="panel">
+        <div class="panel-cabecera">
+          <h2>Lo que escuchó el paciente</h2>
+          <span class="pildora" [attr.data-estado]="colgada() ? 'alerta' : 'en_cola'">
+            <span class="punto"></span>{{ colgada() ? 'ABANDONADA' : llamada.estado }}
+          </span>
+        </div>
+
+        <div class="panel-cuerpo">
+          <p class="locucion">
+            <span class="icono pequeno">campaign</span>
+            {{ llamada.avisoReproducido }}
+          </p>
+
+          <div class="rejilla-datos">
+            <div>
+              <span class="rotulo">Documento capturado</span>
+              @if (llamada.documentoIvr) {
+                <p class="dato destacado tabular">{{ llamada.documentoIvr }}</p>
+              } @else {
+                <p class="sin-dato">Ninguno</p>
+              }
+            </div>
+            <div>
+              <span class="rotulo">Identificador de la llamada</span>
+              <p class="dato codigo tabular">{{ llamada.idLlamada }}</p>
+            </div>
+          </div>
+        </div>
+      </article>
     }
-
-    <div class="acciones">
-      <button type="button" class="principal" (click)="llamar()">Llamar</button>
-      <button
-        type="button"
-        class="peligro"
-        [disabled]="!ultimaLlamada() || colgada()"
-        (click)="colgarPaciente()">
-        Colgar antes de que contesten
-      </button>
-    </div>
   </div>
 
-  @if (mensaje(); as texto) {
-    <p class="mensaje">{{ texto }}</p>
-  }
-
-  @if (ultimaLlamada(); as llamada) {
-    <div class="tarjeta recibo">
-      <h2>Lo que escuchó el paciente</h2>
-      <p class="aviso">{{ llamada.avisoReproducido }}</p>
-      <dl>
-        <dt>Documento capturado</dt>
-        <dd>{{ llamada.documentoIvr ?? 'Ninguno' }}</dd>
-        <dt>Estado de la llamada</dt>
-        <dd>{{ colgada() ? 'abandonada' : llamada.estado }}</dd>
-      </dl>
+  <article class="panel">
+    <div class="panel-cabecera">
+      <h2>Documentos de prueba</h2>
+      <span class="pildora" data-estado="pausa">30 PACIENTES INVENTADOS</span>
     </div>
-  }
 
-  <div class="tarjeta">
-    <h2>Documentos de prueba</h2>
-    <p class="aclaracion">
-      Son pacientes inventados. Ninguno es real.
-    </p>
     <ul class="pacientes">
       @for (paciente of documentosDePrueba(); track paciente.numeroDocumento) {
         <li>
           <button type="button" (click)="usarDocumento(paciente.numeroDocumento)">
-            <span class="documento">{{ paciente.numeroDocumento }}</span>
+            <span class="documento tabular">{{ paciente.numeroDocumento }}</span>
             <span class="nombre">{{ paciente.nombreCompleto }}</span>
-            <span class="derechos" [class.sin-derechos]="paciente.derechos !== 'vigentes'">
+            <span
+              class="pildora"
+              [attr.data-estado]="paciente.derechos === 'vigentes' ? 'disponible' : 'alerta'">
               {{ textoDerechos(paciente.derechos) }}
             </span>
           </button>
@@ -79,9 +120,11 @@
         <li class="vacio">Sin datos de prueba cargados.</li>
       }
     </ul>
-    <p class="nota">
-      Los documentos <strong>1000000098</strong> y <strong>1000000099</strong> no existen
-      a propósito, para probar el error de paciente no encontrado.
+
+    <p class="pie-tabla">
+      Los documentos <strong class="tabular">1000000098</strong> y
+      <strong class="tabular">1000000099</strong> no existen a propósito, para
+      probar el error de paciente no encontrado. Ninguna de estas personas es real.
     </p>
-  </div>
+  </article>
 </section>

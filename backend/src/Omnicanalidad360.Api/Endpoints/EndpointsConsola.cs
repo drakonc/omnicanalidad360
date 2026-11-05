@@ -113,6 +113,19 @@ public static class EndpointsConsola
             var enCola = await contexto.Llamadas
                 .CountAsync(l => l.Estado == EstadoLlamada.EnCola && l.IdAgente == null);
 
+            // Indicadores del turno: solo las llamadas de hoy.
+            var desdeMedianoche = DateTimeOffset.UtcNow
+                .ToOffset(DatosSemilla.ZonaBogota).Date;
+
+            var atendidasHoy = await contexto.Llamadas.CountAsync(l =>
+                l.IdAgente == idAgente
+                && l.Estado == EstadoLlamada.Finalizada
+                && l.HoraEntrada >= desdeMedianoche);
+
+            var abandonadasHoy = await contexto.Llamadas.CountAsync(l =>
+                l.Estado == EstadoLlamada.Abandonada
+                && l.HoraEntrada >= desdeMedianoche);
+
             return Results.Ok(new RespuestaConsola(
                 agente.IdUsuario,
                 agente.Nombre,
@@ -126,7 +139,9 @@ public static class EndpointsConsola
                     llamada.HoraEntrada,
                     llamada.HoraContesta,
                     llamada.AvisoGrabacionReproducido),
-                enCola));
+                enCola,
+                atendidasHoy,
+                abandonadasHoy));
         });
 
         // Cambiar entre disponible y pausa.
@@ -199,4 +214,6 @@ public record RespuestaConsola(
     string EstadoAgente,
     DateTimeOffset? EnEstadoDesde,
     LlamadaEnConsola? Llamada,
-    int LlamadasEnCola);
+    int LlamadasEnCola,
+    int AtendidasHoy,
+    int AbandonadasHoy);

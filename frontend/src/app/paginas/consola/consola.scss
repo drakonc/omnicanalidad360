@@ -1,130 +1,344 @@
-.consola {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
-}
+/* --- Elementos dentro de la franja superior --- */
 
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.selector {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.82rem;
-  color: var(--tinta-suave);
-}
-
-.franja-error {
-  background: #fdecea;
-  border: 1px solid #f3c1bc;
-  color: var(--peligro);
-  border-radius: 8px;
-  padding: 0.6rem 0.9rem;
-  margin: 0 0 1rem;
-}
-
-.barra-estado {
+.acciones-franja {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.75rem;
-  background: var(--superficie);
-  border: 1px solid var(--borde);
-  border-radius: 10px;
-  padding: 0.7rem 1rem;
-  margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
-.barra-estado .acciones {
+.selector-agente {
+  width: auto;
+  min-width: 190px;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: var(--texto-claro);
+  font-size: 0.84rem;
+}
+
+.selector-agente option {
+  color: var(--texto);
+}
+
+.boton-franja {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: var(--texto-claro);
+  white-space: nowrap;
+}
+
+.boton-franja:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* --- Area de trabajo --- */
+
+.escritorio {
+  flex: 1;
+  padding: 1.25rem 1.5rem 2.5rem;
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 1500px;
+  width: 100%;
 }
 
-.barra-estado .cola {
-  margin-left: auto;
-  font-size: 0.88rem;
-  color: var(--tinta-suave);
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1rem;
 }
 
-.etiqueta {
-  font-weight: 600;
-  font-size: 0.85rem;
-  padding: 0.25rem 0.7rem;
-  border-radius: 999px;
-  background: #eceff2;
-  color: var(--tinta-suave);
+.indicador {
+  padding: 0.95rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
-.etiqueta[data-estado="disponible"] {
-  background: #e4f4ec;
-  color: var(--exito);
-}
-
-.etiqueta[data-estado="en_llamada"] {
-  background: var(--acento-suave);
+.indicador strong {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
   color: var(--acento);
 }
 
-.etiqueta[data-estado="pausa"] {
-  background: #fdf0e3;
-  color: var(--alerta);
+.indicador .estado-texto {
+  font-size: 1.4rem;
+  color: var(--texto);
 }
 
-.sonando {
-  border-color: var(--acento);
-  border-width: 2px;
-  animation: latido 1.2s ease-in-out infinite;
+.columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.1rem;
+  align-items: start;
 }
 
-@keyframes latido {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(11, 107, 203, 0.28); }
-  50% { box-shadow: 0 0 0 7px rgba(11, 107, 203, 0); }
+.columna {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  min-width: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sonando { animation: none; }
+.panel-cabecera h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
-.sonando button,
-.en-curso button {
-  margin-top: 1rem;
+/* --- Softphone --- */
+
+.numero {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin: 0;
 }
 
-.cronometro {
-  font-size: 2rem;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  margin: 0 0 0.75rem;
-  color: var(--acento);
+.linea-sip {
+  margin: 0.15rem 0 1.15rem;
+  font-size: 0.82rem;
+  color: var(--texto-tenue);
 }
 
-.sin-dato {
-  color: var(--alerta);
-  font-style: italic;
-}
-
-.pendiente {
-  margin: 1rem 0 0;
-  padding: 0.55rem 0.8rem;
-  background: var(--fondo);
-  border-radius: 6px;
-  font-size: 0.85rem;
-  color: var(--tinta-suave);
+.acciones-llamada .ancho {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1rem;
 }
 
 .vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
   text-align: center;
-  color: var(--tinta-suave);
+  color: var(--texto-tenue);
+  padding: 1.75rem 0.5rem;
+  margin: 0;
 }
 
-.cabecera-derecha {
+/* --- Guion --- */
+
+.guion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.paso {
+  display: flex;
+  gap: 0.75rem;
+  background: #fafbfc;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 0.7rem 0.85rem;
+}
+
+.numero-paso {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--acento);
+  color: var(--texto-claro);
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.paso p {
+  margin: 0.2rem 0 0;
+  font-size: 0.87rem;
+  color: var(--texto-suave);
+}
+
+/* --- Ficha del paciente --- */
+
+.campo-dato {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.campo-dato p {
+  margin: 0;
+}
+
+.nota-dato {
   display: flex;
   align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--disponible);
+}
+
+.dato.confirmado {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--disponible);
+}
+
+.pendiente-hito {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.15rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--pausa-suave);
+  border: 1px solid #f0dcb3;
+  border-radius: var(--radio);
+  color: #8a5e0a;
+}
+
+.pendiente-hito strong {
+  font-size: 0.86rem;
+}
+
+.pendiente-hito p {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+}
+
+/* --- Modal de llamada entrante --- */
+
+.velo {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 33, 61, 0.55);
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  z-index: 50;
+}
+
+.modal-llamada {
+  width: min(680px, 100%);
+  background: var(--panel);
+  border-radius: var(--radio-grande);
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(20, 33, 61, 0.35);
+  animation: aparecer 160ms ease-out;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.modal-llamada header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: var(--en-llamada);
+  color: var(--texto-claro);
+  padding: 1.1rem 1.35rem;
+}
+
+.pildora-modal {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: var(--radio-pildora);
+  padding: 0.15rem 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.linea-modal {
+  margin-left: 0.6rem;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.modal-llamada header h2 {
+  margin-top: 0.4rem;
+  font-size: 1.25rem;
+}
+
+.tiempo-timbre {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.tiempo-timbre strong {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.tiempo-timbre span {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+}
+
+.cuerpo-modal {
+  padding: 1.25rem 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.bloque-origen {
+  background: #f6f8fb;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 0.8rem 1rem;
+}
+
+.bloque-origen .numero {
+  font-size: 1.6rem;
+  margin-top: 0.1rem;
+}
+
+.rejilla-modal {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.75rem;
+}
+
+.caja {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 0.75rem 0.9rem;
+}
+
+.caja p {
+  margin: 0.2rem 0 0;
+}
+
+.acciones-modal .grande {
+  width: 100%;
+  padding: 0.95rem;
+  font-size: 1.05rem;
+}
+
+.modal-llamada footer {
+  display: flex;
+  justify-content: space-between;
   gap: 1rem;
+  padding: 0.7rem 1.35rem;
+  background: #f6f8fb;
+  border-top: 1px solid var(--borde);
+  font-size: 0.74rem;
+  color: var(--texto-tenue);
+}
+
+@media (max-width: 1100px) {
+  .columnas { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .acciones-franja { flex-wrap: wrap; }
+  .selector-agente { min-width: 150px; }
 }

@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../nucleo/api';
+import { Franja } from '../../diseno/franja';
+import { DatoFranja } from '../../diseno/dato-franja';
 import { DocumentoDePrueba, LlamadaEntrante } from '../../nucleo/modelos';
 
 /**
@@ -9,7 +11,7 @@ import { DocumentoDePrueba, LlamadaEntrante } from '../../nucleo/modelos';
  */
 @Component({
   selector: 'app-simulador',
-  imports: [FormsModule],
+  imports: [FormsModule, Franja, DatoFranja],
   templateUrl: './simulador.html',
   styleUrl: './simulador.scss'
 })

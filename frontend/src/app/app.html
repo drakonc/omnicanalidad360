@@ -1,8 +1,55 @@
-<nav class="navegacion">
-  <span class="marca">Omnicanalidad 360</span>
-  <a routerLink="/consola" routerLinkActive="activo">Consola del agente</a>
-  <a routerLink="/simulador" routerLinkActive="activo">Teléfono del paciente</a>
-  <span class="aviso-simulacion">Llamada, Everest y LUMIER simulados</span>
-</nav>
+<div class="marco">
+  <aside class="lateral">
+    <div class="marca">
+      <span class="icono relleno logo">headset_mic</span>
+      <div>
+        <strong>EverCall</strong>
+        <small>NEPS Imagenología</small>
+      </div>
+    </div>
 
-<router-outlet />
+    <div class="nodo">
+      Piloto local
+      <span class="punto-vivo"></span>
+      SIMULADO
+    </div>
+
+    <nav>
+      @for (opcion of menu(); track opcion.ruta) {
+        <a [routerLink]="opcion.ruta" routerLinkActive="activo">
+          <span class="icono">{{ opcion.icono }}</span>
+          {{ opcion.etiqueta }}
+        </a>
+      }
+
+      <hr class="division" />
+
+      @if (esVistaSupervisor()) {
+        <a routerLink="/consola" class="cambio-perfil">
+          <span class="icono">swap_horiz</span>
+          Ver como agente
+        </a>
+      } @else {
+        <a routerLink="/supervisor" class="cambio-perfil">
+          <span class="icono">swap_horiz</span>
+          Ver como supervisor
+        </a>
+      }
+    </nav>
+
+    <div class="pie-lateral">
+      <div class="usuario">
+        <span class="avatar">{{ usuario().iniciales }}</span>
+        <div>
+          <strong>{{ usuario().nombre }}</strong>
+          <small>{{ usuario().detalle }}</small>
+        </div>
+      </div>
+      <p class="version">Omnicanalidad 360 · versión local</p>
+    </div>
+  </aside>
+
+  <main class="area-trabajo">
+    <router-outlet />
+  </main>
+</div>

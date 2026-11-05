@@ -1,0 +1,126 @@
+.pantalla {
+  flex: 1;
+  padding: 1.25rem 1.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 1300px;
+  width: 100%;
+}
+
+.banda-aviso strong {
+  display: block;
+}
+
+.barra-avance {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.pista {
+  flex: 1;
+  height: 10px;
+  background: var(--borde);
+  border-radius: var(--radio-pildora);
+  overflow: hidden;
+}
+
+.pista span {
+  display: block;
+  height: 100%;
+  background: var(--acento);
+}
+
+.columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.panel-cabecera h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.nombre {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.rejilla-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.9rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.rejilla-datos p {
+  margin: 0.1rem 0 0;
+}
+
+.cita-objetivo {
+  display: flex;
+  gap: 0.75rem;
+  background: var(--acento-suave);
+  border: 1px solid #c3dedd;
+  border-radius: var(--radio);
+  padding: 0.85rem 1rem;
+  color: var(--acento-oscuro);
+  margin-bottom: 1.15rem;
+}
+
+.cita-objetivo p {
+  margin: 0.1rem 0 0;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.acciones .ancho {
+  flex: 1;
+  padding: 0.8rem;
+  font-size: 0.98rem;
+}
+
+.guion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.paso {
+  display: flex;
+  gap: 0.75rem;
+  background: #fafbfc;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 0.7rem 0.85rem;
+}
+
+.paso p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.numero-paso {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--acento);
+  color: var(--texto-claro);
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1000px) {
+  .columnas { grid-template-columns: minmax(0, 1fr); }
+}

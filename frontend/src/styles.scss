@@ -1,53 +1,151 @@
-/* Estilos base de la plataforma. */
+/*
+ * Sistema de diseno EverCall.
+ * Paleta y estados tomados de la especificacion del diseno en Stitch
+ * (proyecto "EverCall Contact Center MVP").
+ *
+ * Principio: sobrio, calmado y funcional para jornadas de 8 horas continuas.
+ */
 
 :root {
-  --tinta: #1b2733;
-  --tinta-suave: #5a6b7b;
-  --fondo: #f3f5f7;
-  --superficie: #ffffff;
-  --borde: #d9e0e7;
-  --acento: #0b6bcb;
-  --acento-suave: #e7f1fb;
-  --exito: #1a7f52;
-  --alerta: #b4542a;
-  --peligro: #b3261e;
+  /* Superficies */
+  --tinta: #14213d;              /* Barra lateral */
+  --fondo: #f3f5f8;              /* Fondo del area de trabajo */
+  --panel: #ffffff;              /* Tarjetas */
+  --borde: #dce1e8;
+  --acento: #0e6e6e;             /* Verde azulado de la marca */
+  --acento-oscuro: #005454;
+  --acento-suave: #e6f2f2;
+
+  /* Texto */
+  --texto: #14213d;
+  --texto-suave: #5a6b7b;
+  --texto-tenue: #8a94a6;
+  --texto-claro: #ffffff;
+
+  /* Estados del agente y de la llamada */
+  --disponible: #2e9e5b;
+  --en-llamada: #2f6fde;
+  --post-llamada: #7a5af8;
+  --pausa: #d89614;
+  --desconectado: #8a94a6;
+  --alerta: #d64545;
+
+  /* Fondos suaves de cada estado */
+  --disponible-suave: #e8f5ed;
+  --en-llamada-suave: #e8f0fd;
+  --post-llamada-suave: #efecfe;
+  --pausa-suave: #fdf4e3;
+  --desconectado-suave: #eef0f3;
+  --alerta-suave: #fdeaea;
+
+  /* Medidas del diseno */
+  --alto-franja: 64px;           /* Franja de estado prominente */
+  --ancho-lateral: 248px;
+  --radio: 4px;
+  --radio-grande: 8px;
+  --radio-pildora: 999px;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   background: var(--fondo);
-  color: var(--tinta);
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-  font-size: 15px;
+  color: var(--texto);
+  font-family: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1 {
-  font-size: 1.4rem;
+h1, h2, h3 {
   margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
-h2 {
-  font-size: 1.05rem;
-  margin: 0 0 0.75rem;
+h1 { font-size: 1.3rem; }
+h2 { font-size: 1.05rem; }
+h3 { font-size: 0.92rem; }
+
+/* Iconos Material Symbols */
+.icono {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  user-select: none;
+  flex-shrink: 0;
 }
+
+.icono.relleno { font-variation-settings: "FILL" 1; }
+.icono.pequeno { font-size: 16px; }
+.icono.grande { font-size: 28px; }
+
+/* Numeros que no bailan: cronometros, contadores e indicadores */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* --- Tarjetas --- */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-grande);
+}
+
+.panel-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.15rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.panel-cuerpo {
+  padding: 1.15rem;
+}
+
+/* --- Botones --- */
 
 button {
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
   border: 1px solid var(--borde);
-  background: var(--superficie);
-  color: var(--tinta);
-  border-radius: 6px;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.95rem;
+  background: var(--panel);
+  color: var(--texto);
+  border-radius: var(--radio);
+  padding: 0.55rem 1rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 120ms ease, border-color 120ms ease;
 }
 
 button:hover:not(:disabled) {
   border-color: var(--acento);
+  background: var(--acento-suave);
 }
 
 button:disabled {
@@ -58,58 +156,193 @@ button:disabled {
 button.principal {
   background: var(--acento);
   border-color: var(--acento);
-  color: #fff;
+  color: var(--texto-claro);
   font-weight: 600;
 }
 
-button.peligro {
-  background: var(--peligro);
-  border-color: var(--peligro);
-  color: #fff;
+button.principal:hover:not(:disabled) {
+  background: var(--acento-oscuro);
+  border-color: var(--acento-oscuro);
 }
+
+button.peligro {
+  background: var(--alerta);
+  border-color: var(--alerta);
+  color: var(--texto-claro);
+  font-weight: 600;
+}
+
+button.peligro:hover:not(:disabled) {
+  background: #bf3a3a;
+  border-color: #bf3a3a;
+}
+
+button.exito {
+  background: var(--disponible);
+  border-color: var(--disponible);
+  color: var(--texto-claro);
+  font-weight: 600;
+}
+
+button.exito:hover:not(:disabled) {
+  background: #27854c;
+  border-color: #27854c;
+}
+
+/* --- Campos --- */
 
 input[type="text"],
-select {
-  border: 1px solid var(--borde);
-  border-radius: 6px;
-  padding: 0.45rem 0.6rem;
-  font-size: 0.95rem;
+input[type="search"],
+select,
+textarea {
   font-family: inherit;
-  background: var(--superficie);
-  color: inherit;
-}
-
-.tarjeta {
-  background: var(--superficie);
+  font-size: 0.9rem;
   border: 1px solid var(--borde);
-  border-radius: 10px;
-  padding: 1.1rem 1.25rem;
-  margin-bottom: 1rem;
+  border-radius: var(--radio);
+  padding: 0.5rem 0.7rem;
+  background: var(--panel);
+  color: var(--texto);
+  width: 100%;
 }
 
-.aclaracion {
-  color: var(--tinta-suave);
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: -1px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+label.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* --- Etiquetas de estado --- */
+
+.pildora {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radio-pildora);
+  background: var(--desconectado-suave);
+  color: var(--desconectado);
+  white-space: nowrap;
+}
+
+.pildora .punto {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.pildora[data-estado="disponible"] { background: var(--disponible-suave); color: var(--disponible); }
+.pildora[data-estado="en_llamada"] { background: var(--en-llamada-suave); color: var(--en-llamada); }
+.pildora[data-estado="en_cola"]    { background: var(--en-llamada-suave); color: var(--en-llamada); }
+.pildora[data-estado="post_llamada"] { background: var(--post-llamada-suave); color: var(--post-llamada); }
+.pildora[data-estado="pausa"]      { background: var(--pausa-suave); color: var(--pausa); }
+.pildora[data-estado="alerta"]     { background: var(--alerta-suave); color: var(--alerta); }
+
+/* --- Rotulos de dato --- */
+
+.rotulo {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+}
+
+.dato {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.dato.destacado {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* --- Tablas --- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 0.88rem;
-  margin: 0.2rem 0 0;
 }
 
-.nota {
-  color: var(--tinta-suave);
-  font-size: 0.85rem;
+thead th {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--texto-tenue);
+  padding: 0.6rem 1.15rem;
+  border-bottom: 1px solid var(--borde);
+  background: #fafbfc;
 }
 
-dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.35rem 1.25rem;
-  margin: 0;
+tbody td {
+  padding: 0.7rem 1.15rem;
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
 }
 
-dt {
-  color: var(--tinta-suave);
-  font-size: 0.85rem;
+tbody tr:last-child td {
+  border-bottom: 0;
 }
 
-dd {
-  margin: 0;
+/* --- Avisos --- */
+
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: var(--radio);
+  font-size: 0.86rem;
+  border: 1px solid transparent;
+}
+
+.aviso.informativo { background: var(--en-llamada-suave); border-color: #c5d8f8; color: #1d4ea8; }
+.aviso.error       { background: var(--alerta-suave); border-color: #f3c7c7; color: #9e2f2f; }
+.aviso.pendiente   { background: var(--pausa-suave); border-color: #f0dcb3; color: #8a5e0a; }
+
+/* --- Utilidades --- */
+
+.sin-dato {
+  color: var(--texto-tenue);
+  font-style: italic;
+}
+
+.separador {
+  height: 1px;
+  background: var(--borde);
+  border: 0;
+  margin: 1rem 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

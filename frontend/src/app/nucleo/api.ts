@@ -3,9 +3,11 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
   Agente,
+  Causal,
   DocumentoDePrueba,
   EstadoConsola,
-  LlamadaEntrante
+  LlamadaEntrante,
+  Tablero
 } from './modelos';
 
 /**
@@ -53,5 +55,15 @@ export class Api {
 
   colgar(idAgente: string, idLlamada: string): Observable<unknown> {
     return this.http.post(`${this.base}/consola/${idAgente}/colgar/${idLlamada}`, {});
+  }
+
+  // Supervision.
+
+  tablero(): Observable<Tablero> {
+    return this.http.get<Tablero>(`${this.base}/supervisor/tablero`);
+  }
+
+  tipificaciones(): Observable<Causal[]> {
+    return this.http.get<Causal[]>(`${this.base}/catalogo/tipificaciones`);
   }
 }

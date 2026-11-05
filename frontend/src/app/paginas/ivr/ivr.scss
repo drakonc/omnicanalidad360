@@ -1,0 +1,132 @@
+.pantalla {
+  flex: 1;
+  padding: 1.25rem 1.5rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 1300px;
+  width: 100%;
+}
+
+.banda-aviso strong {
+  font-weight: 600;
+}
+
+.columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+.panel-cabecera h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* --- Arbol vertical --- */
+
+.arbol {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.nodo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+  width: 100%;
+}
+
+.nodo.elegido {
+  border-color: var(--acento);
+  border-width: 2px;
+  background: var(--acento-suave);
+}
+
+.nodo.inactivo {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+.icono-nodo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radio);
+  background: var(--acento-suave);
+  color: var(--acento-oscuro);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.nodo.inactivo .icono-nodo {
+  background: var(--desconectado-suave);
+  color: var(--desconectado);
+}
+
+.texto-nodo {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.texto-nodo strong {
+  font-size: 0.92rem;
+}
+
+.texto-nodo small {
+  font-size: 0.76rem;
+  color: var(--texto-tenue);
+}
+
+.union {
+  width: 2px;
+  height: 16px;
+  background: var(--acento);
+  margin-left: 2.05rem;
+}
+
+.union.inactiva {
+  background: var(--borde);
+}
+
+/* --- Detalle --- */
+
+.rotulo.separado,
+.campo.separado {
+  display: block;
+  margin-top: 1.1rem;
+}
+
+.detalle {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.rejilla-parametros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem 1.25rem;
+  margin-top: 1.1rem;
+}
+
+.rejilla-parametros p {
+  margin: 0.1rem 0 0;
+}
+
+.acciones {
+  margin-top: 1.25rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--borde);
+}
+
+@media (max-width: 1000px) {
+  .columnas { grid-template-columns: minmax(0, 1fr); }
+}

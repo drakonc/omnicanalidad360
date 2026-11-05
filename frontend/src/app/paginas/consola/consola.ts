@@ -4,20 +4,21 @@ import { Observable } from 'rxjs';
 import { Api } from '../../nucleo/api';
 import { IndicadorConexion } from '../../nucleo/indicador-conexion';
 import { Sincronizacion, Vigilancia } from '../../nucleo/sincronizacion';
+import { Franja } from '../../diseno/franja';
+import { DatoFranja } from '../../diseno/dato-franja';
 import { Agente, ESTADO_AGENTE, ESTADO_LLAMADA, EstadoConsola } from '../../nucleo/modelos';
 
 /**
- * Consola del agente (ruta /consola del PRD).
- * En este hito muestra el estado del agente, la llamada que le suena,
- * el documento que capturo el IVR y el cronometro de la conversacion.
+ * Escritorio del agente (ruta /consola del PRD, "Mi escritorio" en el diseno).
+ * Muestra el estado del agente, la llamada que le suena, el documento que
+ * capturo el IVR y el cronometro de la conversacion.
  *
- * La pantalla no se refresca sola: le pide el estado a la plataforma cada
- * segundo a traves de Sincronizacion, que conserva el ultimo dato bueno
- * si la plataforma deja de responder.
+ * La pantalla le pide el estado a la plataforma cada segundo a traves de
+ * Sincronizacion, que conserva el ultimo dato bueno si la plataforma falla.
  */
 @Component({
   selector: 'app-consola',
-  imports: [FormsModule, IndicadorConexion],
+  imports: [FormsModule, IndicadorConexion, Franja, DatoFranja],
   templateUrl: './consola.html',
   styleUrl: './consola.scss'
 })
@@ -38,6 +39,22 @@ export class Consola implements OnInit, OnDestroy {
   protected readonly idAgente = signal('AG-01');
   protected readonly error = signal<string | null>(null);
 
+  /** Guion de atencion sugerido, tomado del diseno. */
+  protected readonly guion = [
+    {
+      titulo: 'Saludo institucional',
+      texto: 'Buenos días, le habla [nombre] de NEPS Imagenología. ¿Con quién tengo el gusto de hablar?'
+    },
+    {
+      titulo: 'Validación de identidad',
+      texto: 'Por favor me confirma su número de documento y su fecha de nacimiento.'
+    },
+    {
+      titulo: 'Cierre y aviso de calidad',
+      texto: 'Le recuerdo que esta llamada está siendo grabada para fines de calidad.'
+    }
+  ];
+
   protected readonly estado = computed(() => this.vigilancia()?.estado().datos ?? null);
   protected readonly conectado = computed(() => this.vigilancia()?.estado().conectado ?? true);
   protected readonly segundosSinDato = computed(
@@ -49,10 +66,6 @@ export class Consola implements OnInit, OnDestroy {
     () => this.estado()?.estadoAgente === ESTADO_AGENTE.disponible
   );
 
-  protected readonly estaEnPausa = computed(
-    () => this.estado()?.estadoAgente === ESTADO_AGENTE.pausa
-  );
-
   /** La llamada esta sonando: ya tiene agente, pero nadie ha contestado. */
   protected readonly llamadaSonando = computed(
     () => this.estado()?.llamada?.estado === ESTADO_LLAMADA.enCola
@@ -61,6 +74,19 @@ export class Consola implements OnInit, OnDestroy {
   protected readonly llamadaEnCurso = computed(
     () => this.estado()?.llamada?.estado === ESTADO_LLAMADA.enCurso
   );
+
+  /** Color de la franja superior: sigue el estado del agente o de la llamada. */
+  protected readonly estadoFranja = computed(() => {
+    if (this.llamadaSonando()) {
+      return ESTADO_LLAMADA.enCola;
+    }
+    return this.estado()?.estadoAgente ?? ESTADO_AGENTE.desconectado;
+  });
+
+  protected readonly textoEnCola = computed(() => {
+    const cuantas = this.estado()?.llamadasEnCola ?? 0;
+    return cuantas === 1 ? '1 llamada' : `${cuantas} llamadas`;
+  });
 
   /**
    * Cronometro de la conversacion, desde que el agente contesto.
@@ -81,6 +107,12 @@ export class Consola implements OnInit, OnDestroy {
       return 0;
     }
     return this.segundosDesde(llamada.horaEntrada);
+  });
+
+  /** Cuanto lleva el agente en su estado actual. */
+  protected readonly segundosEnEstado = computed(() => {
+    const desde = this.estado()?.enEstadoDesde;
+    return desde ? this.segundosDesde(desde) : 0;
   });
 
   ngOnInit(): void {
@@ -143,7 +175,7 @@ export class Consola implements OnInit, OnDestroy {
       case ESTADO_AGENTE.pausa:
         return 'En pausa';
       default:
-        return 'Desconectado';
+        return this.llamadaSonando() ? 'Timbrando' : 'Desconectado';
     }
   }
 

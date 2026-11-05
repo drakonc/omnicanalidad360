@@ -1,0 +1,95 @@
+<app-franja [estado]="marcando() ? 'en_llamada' : 'disponible'"
+            [etiquetaEstado]="marcando() ? 'Marcando' : 'Vista previa'">
+  <app-dato-franja rotulo="Campaña" [valor]="campana.nombre" />
+  <app-dato-franja rotulo="Avance" [valor]="campana.gestionados + ' de ' + campana.totalContactos" />
+  <app-dato-franja rotulo="Pendientes" [valor]="campana.pendientes + ' contactos'" />
+</app-franja>
+
+<section class="pantalla">
+  <p class="aviso error banda-aviso">
+    <span class="icono pequeno">warning</span>
+    <span>
+      <strong>Esta pantalla está fuera del alcance del piloto.</strong>
+      El PRD excluye expresamente las llamadas salientes: «tienen otro flujo, con
+      HIS y Saludtools». Está aquí porque viene en el diseño, pero es solo una
+      maqueta con datos inventados: ningún botón llama a nadie.
+    </span>
+  </p>
+
+  <div class="barra-avance">
+    <div class="pista"><span [style.width.%]="avance()"></span></div>
+    <strong class="tabular">{{ avance() }}%</strong>
+  </div>
+
+  <div class="columnas">
+    <article class="panel">
+      <div class="panel-cabecera">
+        <h2>Contacto actual</h2>
+        <span class="pildora" data-estado="pausa">DATOS DE PRUEBA</span>
+      </div>
+
+      <div class="panel-cuerpo">
+        <p class="nombre">{{ campana.contactoActual.nombre }}</p>
+
+        <div class="rejilla-datos">
+          <div>
+            <span class="rotulo">Documento</span>
+            <p class="dato tabular">{{ campana.contactoActual.documento }}</p>
+          </div>
+          <div>
+            <span class="rotulo">Teléfono</span>
+            <p class="dato tabular">{{ campana.contactoActual.telefono }}</p>
+          </div>
+          <div>
+            <span class="rotulo">EPS</span>
+            <p class="dato">{{ campana.contactoActual.eps }}</p>
+          </div>
+        </div>
+
+        <div class="cita-objetivo">
+          <span class="icono">event</span>
+          <div>
+            <span class="rotulo">Cita por confirmar</span>
+            <p class="dato">{{ campana.contactoActual.cita }}</p>
+          </div>
+        </div>
+
+        <div class="acciones">
+          @if (marcando()) {
+            <button type="button" class="peligro ancho" (click)="alternarMarcacion()">
+              <span class="icono">call_end</span> Terminar marcación
+            </button>
+          } @else {
+            <button type="button" class="exito ancho" (click)="alternarMarcacion()">
+              <span class="icono">call</span> Marcar contacto
+            </button>
+          }
+          <button type="button">
+            <span class="icono pequeno">skip_next</span> Saltar
+          </button>
+        </div>
+
+        @if (marcando()) {
+          <p class="aviso informativo">
+            <span class="icono pequeno">info</span>
+            No se está marcando nada. Es solo el aspecto de la pantalla.
+          </p>
+        }
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-cabecera">
+        <h2><span class="icono pequeno">description</span> Guion de confirmación</h2>
+      </div>
+      <div class="panel-cuerpo guion">
+        @for (linea of campana.guion; track linea; let i = $index) {
+          <div class="paso">
+            <span class="numero-paso">{{ i + 1 }}</span>
+            <p>{{ linea }}</p>
+          </div>
+        }
+      </div>
+    </article>
+  </div>
+</section>
