@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Omnicanalidad360.Api/Omnicanalidad360.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Omnicanalidad360.Tests/Omnicanalidad360.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,30 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Base de datos local SQLite
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Angular y Node
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# Entorno y secretos
+.env
+.env.*
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Sistema operativo y editores
+Thumbs.db
+.DS_Store
+.idea/
