@@ -1,0 +1,108 @@
+<section class="consola">
+  <header>
+    <div>
+      <h1>Consola del agente</h1>
+      <p class="aclaracion">NEPS Imagenología · línea de prueba</p>
+    </div>
+
+    <label class="selector">
+      Agente
+      <select [ngModel]="idAgente()" (ngModelChange)="cambiarAgente($event)" name="agente">
+        @for (agente of agentes(); track agente.idUsuario) {
+          <option [value]="agente.idUsuario">
+            {{ agente.idUsuario }} · {{ agente.nombre }}
+          </option>
+        }
+      </select>
+    </label>
+  </header>
+
+  @if (error(); as texto) {
+    <p class="franja-error">{{ texto }}</p>
+  }
+
+  <div class="barra-estado">
+    <span class="etiqueta" [attr.data-estado]="estado()?.estadoAgente">
+      {{ textoEstadoAgente(estado()?.estadoAgente) }}
+    </span>
+
+    <div class="acciones">
+      <button
+        type="button"
+        [disabled]="estaDisponible() || llamadaEnCurso()"
+        (click)="ponerse('disponible')">
+        Ponerme disponible
+      </button>
+      <button
+        type="button"
+        [disabled]="estaEnPausa() || llamadaEnCurso()"
+        (click)="ponerse('pausa')">
+        Ponerme en pausa
+      </button>
+    </div>
+
+    <span class="cola">
+      Esperando en cola: <strong>{{ estado()?.llamadasEnCola ?? 0 }}</strong>
+    </span>
+  </div>
+
+  @if (llamadaSonando()) {
+    <div class="tarjeta sonando">
+      <h2>Llamada entrante</h2>
+      <dl>
+        <dt>Número de origen</dt>
+        <dd>{{ estado()?.llamada?.telefonoOrigen }}</dd>
+        <dt>Documento capturado por el IVR</dt>
+        <dd>
+          @if (estado()?.llamada?.documentoIvr; as documento) {
+            <strong>{{ documento }}</strong>
+          } @else {
+            <span class="sin-dato">El paciente no marcó documento</span>
+          }
+        </dd>
+        <dt>Esperando hace</dt>
+        <dd>{{ comoReloj(segundosEnEspera()) }}</dd>
+      </dl>
+      <button type="button" class="principal" (click)="contestar()">Contestar</button>
+    </div>
+  } @else if (llamadaEnCurso()) {
+    <div class="tarjeta en-curso">
+      <h2>En llamada</h2>
+      <p class="cronometro">{{ comoReloj(segundosEnLlamada()) }}</p>
+      <dl>
+        <dt>Número de origen</dt>
+        <dd>{{ estado()?.llamada?.telefonoOrigen }}</dd>
+        <dt>Documento capturado por el IVR</dt>
+        <dd>
+          @if (estado()?.llamada?.documentoIvr; as documento) {
+            <strong>{{ documento }}</strong>
+          } @else {
+            <span class="sin-dato">El paciente no marcó documento</span>
+          }
+        </dd>
+        <dt>Aviso de grabación</dt>
+        <dd>
+          {{ estado()?.llamada?.avisoGrabacionReproducido ? 'Reproducido' : 'No reproducido' }}
+        </dd>
+      </dl>
+
+      <p class="pendiente">
+        Los datos del paciente, el agendamiento y la tipificación llegan en los
+        siguientes hitos.
+      </p>
+
+      <button type="button" class="peligro" (click)="colgar()">Colgar</button>
+    </div>
+  } @else {
+    <div class="tarjeta vacio">
+      <h2>Esperando llamadas</h2>
+      <p>
+        @if (estaDisponible()) {
+          Estás disponible. La próxima llamada que entre sonará aquí.
+        } @else {
+          Ponte disponible para recibir llamadas.
+        }
+      </p>
+    </div>
+  }
+</section>

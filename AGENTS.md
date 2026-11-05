@@ -15,7 +15,7 @@ Plataforma de atención telefónica para la subcampaña NEPS Imagenología de Li
 3. Pruebas: `cd backend && dotnet test`.
 
 ## Hitos
-- [ ] Consola y datos de prueba
+- [x] Consola y datos de prueba
 - [ ] Paciente precargado
 - [ ] Registro único
 - [ ] Supervisor y exportación

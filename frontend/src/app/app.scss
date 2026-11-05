@@ -1,0 +1,34 @@
+.navegacion {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.marca {
+  font-weight: 700;
+}
+
+.navegacion a {
+  color: var(--tinta-suave);
+  text-decoration: none;
+  font-size: 0.92rem;
+  padding: 0.25rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.navegacion a.activo {
+  color: var(--acento);
+  border-bottom-color: var(--acento);
+}
+
+.aviso-simulacion {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--alerta);
+  background: #fdf0e3;
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+}

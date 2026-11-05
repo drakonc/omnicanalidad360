@@ -1,0 +1,124 @@
+.consola {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: var(--tinta-suave);
+}
+
+.franja-error {
+  background: #fdecea;
+  border: 1px solid #f3c1bc;
+  color: var(--peligro);
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.barra-estado {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.barra-estado .acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.barra-estado .cola {
+  margin-left: auto;
+  font-size: 0.88rem;
+  color: var(--tinta-suave);
+}
+
+.etiqueta {
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: #eceff2;
+  color: var(--tinta-suave);
+}
+
+.etiqueta[data-estado="disponible"] {
+  background: #e4f4ec;
+  color: var(--exito);
+}
+
+.etiqueta[data-estado="en_llamada"] {
+  background: var(--acento-suave);
+  color: var(--acento);
+}
+
+.etiqueta[data-estado="pausa"] {
+  background: #fdf0e3;
+  color: var(--alerta);
+}
+
+.sonando {
+  border-color: var(--acento);
+  border-width: 2px;
+  animation: latido 1.2s ease-in-out infinite;
+}
+
+@keyframes latido {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(11, 107, 203, 0.28); }
+  50% { box-shadow: 0 0 0 7px rgba(11, 107, 203, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sonando { animation: none; }
+}
+
+.sonando button,
+.en-curso button {
+  margin-top: 1rem;
+}
+
+.cronometro {
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+  color: var(--acento);
+}
+
+.sin-dato {
+  color: var(--alerta);
+  font-style: italic;
+}
+
+.pendiente {
+  margin: 1rem 0 0;
+  padding: 0.55rem 0.8rem;
+  background: var(--fondo);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+}
+
+.vacio {
+  text-align: center;
+  color: var(--tinta-suave);
+}

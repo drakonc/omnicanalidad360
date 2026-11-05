@@ -1,0 +1,87 @@
+<section class="simulador">
+  <header>
+    <h1>Teléfono del paciente</h1>
+    <p class="aclaracion">
+      Esto hace de llamada entrante mientras no está la telefonía real.
+      Es lo primero que se reemplaza cuando llegue el número de prueba en Azure.
+    </p>
+  </header>
+
+  <div class="tarjeta">
+    <label>
+      Número desde el que llama
+      <input type="text" [(ngModel)]="telefono" name="telefono" />
+    </label>
+
+    <label class="casilla">
+      <input type="checkbox" [(ngModel)]="marcaDocumento" name="marcaDocumento" />
+      El paciente marca su documento en el teclado
+    </label>
+
+    @if (marcaDocumento()) {
+      <label>
+        Documento marcado
+        <input type="text" [(ngModel)]="documento" name="documento" />
+      </label>
+    } @else {
+      <p class="nota">
+        El paciente no marca nada. Tras 2 intentos de 10 segundos, la llamada
+        igual pasa a la cola, pero sin documento.
+      </p>
+    }
+
+    <div class="acciones">
+      <button type="button" class="principal" (click)="llamar()">Llamar</button>
+      <button
+        type="button"
+        class="peligro"
+        [disabled]="!ultimaLlamada() || colgada()"
+        (click)="colgarPaciente()">
+        Colgar antes de que contesten
+      </button>
+    </div>
+  </div>
+
+  @if (mensaje(); as texto) {
+    <p class="mensaje">{{ texto }}</p>
+  }
+
+  @if (ultimaLlamada(); as llamada) {
+    <div class="tarjeta recibo">
+      <h2>Lo que escuchó el paciente</h2>
+      <p class="aviso">{{ llamada.avisoReproducido }}</p>
+      <dl>
+        <dt>Documento capturado</dt>
+        <dd>{{ llamada.documentoIvr ?? 'Ninguno' }}</dd>
+        <dt>Estado de la llamada</dt>
+        <dd>{{ colgada() ? 'abandonada' : llamada.estado }}</dd>
+      </dl>
+    </div>
+  }
+
+  <div class="tarjeta">
+    <h2>Documentos de prueba</h2>
+    <p class="aclaracion">
+      Son pacientes inventados. Ninguno es real.
+    </p>
+    <ul class="pacientes">
+      @for (paciente of documentosDePrueba(); track paciente.numeroDocumento) {
+        <li>
+          <button type="button" (click)="usarDocumento(paciente.numeroDocumento)">
+            <span class="documento">{{ paciente.numeroDocumento }}</span>
+            <span class="nombre">{{ paciente.nombreCompleto }}</span>
+            <span class="derechos" [class.sin-derechos]="paciente.derechos !== 'vigentes'">
+              {{ textoDerechos(paciente.derechos) }}
+            </span>
+          </button>
+        </li>
+      } @empty {
+        <li class="vacio">Sin datos de prueba cargados.</li>
+      }
+    </ul>
+    <p class="nota">
+      Los documentos <strong>1000000098</strong> y <strong>1000000099</strong> no existen
+      a propósito, para probar el error de paciente no encontrado.
+    </p>
+  </div>
+</section>
