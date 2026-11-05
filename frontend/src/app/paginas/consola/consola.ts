@@ -1,34 +1,49 @@
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Observable } from 'rxjs';
 import { Api } from '../../nucleo/api';
+import { IndicadorConexion } from '../../nucleo/indicador-conexion';
+import { Sincronizacion, Vigilancia } from '../../nucleo/sincronizacion';
 import { Agente, ESTADO_AGENTE, ESTADO_LLAMADA, EstadoConsola } from '../../nucleo/modelos';
 
 /**
  * Consola del agente (ruta /consola del PRD).
  * En este hito muestra el estado del agente, la llamada que le suena,
  * el documento que capturo el IVR y el cronometro de la conversacion.
+ *
+ * La pantalla no se refresca sola: le pide el estado a la plataforma cada
+ * segundo a traves de Sincronizacion, que conserva el ultimo dato bueno
+ * si la plataforma deja de responder.
  */
 @Component({
   selector: 'app-consola',
-  imports: [FormsModule],
+  imports: [FormsModule, IndicadorConexion],
   templateUrl: './consola.html',
   styleUrl: './consola.scss'
 })
 export class Consola implements OnInit, OnDestroy {
   private readonly api = inject(Api);
+  private readonly sincronizacion = inject(Sincronizacion);
 
-  /** Cada cuanto la consola vuelve a preguntar si hay novedades. */
+  /** Cada cuanto la consola le pregunta a la plataforma si hay novedades. */
   private static readonly MILISEGUNDOS_REFRESCO = 1000;
 
-  private temporizador?: ReturnType<typeof setInterval>;
+  /**
+   * La vigilancia es una senal porque cambia al elegir otro agente:
+   * asi las pantallas se enteran de que ahora miran otra fuente.
+   */
+  private readonly vigilancia = signal<Vigilancia<EstadoConsola> | null>(null);
 
   protected readonly agentes = signal<Agente[]>([]);
   protected readonly idAgente = signal('AG-01');
-  protected readonly estado = signal<EstadoConsola | null>(null);
   protected readonly error = signal<string | null>(null);
 
-  /** Segundos transcurridos, recalculados en cada refresco. */
-  protected readonly ahora = signal(Date.now());
+  protected readonly estado = computed(() => this.vigilancia()?.estado().datos ?? null);
+  protected readonly conectado = computed(() => this.vigilancia()?.estado().conectado ?? true);
+  protected readonly segundosSinDato = computed(
+    () => this.vigilancia()?.estado().segundosDesdeUltimoDato ?? 0
+  );
+  protected readonly cargando = computed(() => this.vigilancia()?.estado().cargando ?? true);
 
   protected readonly estaDisponible = computed(
     () => this.estado()?.estadoAgente === ESTADO_AGENTE.disponible
@@ -39,24 +54,24 @@ export class Consola implements OnInit, OnDestroy {
   );
 
   /** La llamada esta sonando: ya tiene agente, pero nadie ha contestado. */
-  protected readonly llamadaSonando = computed(() => {
-    const llamada = this.estado()?.llamada;
-    return llamada?.estado === ESTADO_LLAMADA.enCola;
-  });
+  protected readonly llamadaSonando = computed(
+    () => this.estado()?.llamada?.estado === ESTADO_LLAMADA.enCola
+  );
 
-  protected readonly llamadaEnCurso = computed(() => {
-    const llamada = this.estado()?.llamada;
-    return llamada?.estado === ESTADO_LLAMADA.enCurso;
-  });
+  protected readonly llamadaEnCurso = computed(
+    () => this.estado()?.llamada?.estado === ESTADO_LLAMADA.enCurso
+  );
 
-  /** Cronometro de la conversacion, desde que el agente contesto. */
+  /**
+   * Cronometro de la conversacion, desde que el agente contesto.
+   * Se recalcula solo porque el estado cambia en cada vuelta del refresco.
+   */
   protected readonly segundosEnLlamada = computed(() => {
     const llamada = this.estado()?.llamada;
     if (!llamada?.horaContesta) {
       return 0;
     }
-    const inicio = new Date(llamada.horaContesta).getTime();
-    return Math.max(0, Math.floor((this.ahora() - inicio) / 1000));
+    return this.segundosDesde(llamada.horaContesta);
   });
 
   /** Cuanto lleva el paciente esperando, antes de que le contesten. */
@@ -65,36 +80,34 @@ export class Consola implements OnInit, OnDestroy {
     if (!llamada || llamada.horaContesta) {
       return 0;
     }
-    const inicio = new Date(llamada.horaEntrada).getTime();
-    return Math.max(0, Math.floor((this.ahora() - inicio) / 1000));
+    return this.segundosDesde(llamada.horaEntrada);
   });
 
   ngOnInit(): void {
     this.api.agentes().subscribe({
       next: (lista) => this.agentes.set(lista),
-      error: () => this.error.set('No se pudo conectar con la plataforma. Revisa que el backend este corriendo.')
+      error: () => this.error.set(
+        'No se pudo conectar con la plataforma. Revisa que el backend esté corriendo.'
+      )
     });
 
-    this.refrescar();
-    this.temporizador = setInterval(() => this.refrescar(), Consola.MILISEGUNDOS_REFRESCO);
+    this.vigilar();
   }
 
   ngOnDestroy(): void {
-    if (this.temporizador) {
-      clearInterval(this.temporizador);
-    }
+    this.vigilancia()?.detener();
   }
 
   protected cambiarAgente(id: string): void {
     this.idAgente.set(id);
-    this.refrescar();
+    this.vigilar();
   }
 
   protected ponerse(estado: string): void {
-    this.api.cambiarEstado(this.idAgente(), estado).subscribe({
-      next: () => this.refrescar(),
-      error: () => this.error.set('No se pudo cambiar el estado.')
-    });
+    this.ejecutar(
+      this.api.cambiarEstado(this.idAgente(), estado),
+      'No se pudo cambiar el estado.'
+    );
   }
 
   protected contestar(): void {
@@ -103,10 +116,10 @@ export class Consola implements OnInit, OnDestroy {
       return;
     }
 
-    this.api.contestar(this.idAgente(), llamada.idLlamada).subscribe({
-      next: () => this.refrescar(),
-      error: () => this.error.set('Esa llamada ya no esta disponible.')
-    });
+    this.ejecutar(
+      this.api.contestar(this.idAgente(), llamada.idLlamada),
+      'Esa llamada ya no está disponible.'
+    );
   }
 
   protected colgar(): void {
@@ -115,10 +128,10 @@ export class Consola implements OnInit, OnDestroy {
       return;
     }
 
-    this.api.colgar(this.idAgente(), llamada.idLlamada).subscribe({
-      next: () => this.refrescar(),
-      error: () => this.error.set('No se pudo colgar la llamada.')
-    });
+    this.ejecutar(
+      this.api.colgar(this.idAgente(), llamada.idLlamada),
+      'No se pudo colgar la llamada.'
+    );
   }
 
   protected textoEstadoAgente(estado: string | undefined): string {
@@ -140,15 +153,28 @@ export class Consola implements OnInit, OnDestroy {
     return `${String(minutos).padStart(2, '0')}:${String(resto).padStart(2, '0')}`;
   }
 
-  private refrescar(): void {
-    this.ahora.set(Date.now());
+  /** Arranca la vigilancia del agente elegido y descarta la anterior. */
+  private vigilar(): void {
+    this.vigilancia()?.detener();
+    this.vigilancia.set(this.sincronizacion.vigilar(
+      () => this.api.consola(this.idAgente()),
+      Consola.MILISEGUNDOS_REFRESCO
+    ));
+  }
 
-    this.api.consola(this.idAgente()).subscribe({
-      next: (estado) => {
-        this.estado.set(estado);
+  /** Ejecuta una accion del agente y pide el estado nuevo de inmediato. */
+  private ejecutar(accion: Observable<unknown>, mensajeError: string): void {
+    accion.subscribe({
+      next: () => {
         this.error.set(null);
+        this.vigilancia()?.refrescarYa();
       },
-      error: () => this.error.set('No se pudo actualizar la consola.')
+      error: () => this.error.set(mensajeError)
     });
+  }
+
+  private segundosDesde(instante: string): number {
+    const inicio = new Date(instante).getTime();
+    return Math.max(0, Math.floor((Date.now() - inicio) / 1000));
   }
 }

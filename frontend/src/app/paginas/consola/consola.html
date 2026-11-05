@@ -5,16 +5,22 @@
       <p class="aclaracion">NEPS Imagenología · línea de prueba</p>
     </div>
 
-    <label class="selector">
-      Agente
-      <select [ngModel]="idAgente()" (ngModelChange)="cambiarAgente($event)" name="agente">
-        @for (agente of agentes(); track agente.idUsuario) {
-          <option [value]="agente.idUsuario">
-            {{ agente.idUsuario }} · {{ agente.nombre }}
-          </option>
-        }
-      </select>
-    </label>
+    <div class="cabecera-derecha">
+      <app-indicador-conexion
+        [conectado]="conectado()"
+        [segundos]="segundosSinDato()" />
+
+      <label class="selector">
+        Agente
+        <select [ngModel]="idAgente()" (ngModelChange)="cambiarAgente($event)" name="agente">
+          @for (agente of agentes(); track agente.idUsuario) {
+            <option [value]="agente.idUsuario">
+              {{ agente.idUsuario }} · {{ agente.nombre }}
+            </option>
+          }
+        </select>
+      </label>
+    </div>
   </header>
 
   @if (error(); as texto) {
@@ -92,6 +98,11 @@
       </p>
 
       <button type="button" class="peligro" (click)="colgar()">Colgar</button>
+    </div>
+  } @else if (cargando()) {
+    <div class="tarjeta vacio">
+      <h2>Conectando con la plataforma…</h2>
+      <p>Un momento.</p>
     </div>
   } @else {
     <div class="tarjeta vacio">

@@ -122,3 +122,9 @@ header {
   text-align: center;
   color: var(--tinta-suave);
 }
+
+.cabecera-derecha {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
